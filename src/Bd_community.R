@@ -27,13 +27,49 @@ plot(bd_hc)
 # probably don't have enough data for it but seems most appropriate according to
 # https://www.davidzeleny.net/anadat-r/doku.php/en:pcoa_nmds
 # there are a lot of zeroes, so PCA and similar analyses are not ideal
+# https://websites.pmc.ucsc.edu/~mclapham/Rtips/ordination.htm#:~:text=PCoA%20is%20a%20distance%2Dbased,for%20more%20information%20on%20distances).
 
 PCoA.bd<-capscale(transp_bd~1,distance="bray")
 PCoA.bd
 summary(PCoA.bd)
 
 plot(PCoA.bd, type = "n")
-points(PCoA.bd, display = "sites", cex = 0.8, pch=21, col="red", bg="yellow")
-text(PCoA.bd, display = "sites", cex=0.7, col="blue")
+points(PCoA.bd, display = "sites", pch = 2, col="#56B4E9", cex = 1.5)
+text(PCoA.bd, display = "sites", cex=1, col="black", adj = c(1.2,0))
 
-# https://websites.pmc.ucsc.edu/~mclapham/Rtips/ordination.htm#:~:text=PCoA%20is%20a%20distance%2Dbased,for%20more%20information%20on%20distances).
+# nicer plot with ggvegan:
+library("ggvegan")
+library("ggplot2")
+library("viridis")
+library("tidyverse")
+autoplot(PCoA.bd, layers = "sites", arrows = FALSE)
+#auplot <- autoplot(PCoA.bd, layers = c("sites","species"), arrows = FALSE)
+#auplot
+aufort <- fortify(PCoA.bd, display = c("sites","species"))
+aufort
+# extract site coords (points)
+fort_sites <- aufort %>% 
+  filter(Score == "sites")
+
+# extract species coords
+fort_species <- aufort %>% 
+  filter(Score == "species")
+
+# trying to plot with coloring by amount of Bd, arbitrarily assigning categories, sort of
+# L (low) - 0-10/10 ul, M (medium) - 11-30, H (high) - >30
+fort_sites$bdabund <- c("L","M","H","L","L","H","M","H","H")
+
+fortify_plot <- ggplot() +
+  #geom_point(data = fort_species, aes(x = MDS1, y = MDS2)) +
+  #geom_point(data = fort_sites, aes(x = MDS1, y = MDS2), size = 3, shape = 2) +
+  geom_vline(xintercept = c(0), color = "grey70", linetype = 2) +
+  geom_hline(yintercept = c(0), color = "grey70", linetype = 2) +
+  geom_point(data = fort_sites, aes(x = MDS1, y = MDS2, color = bdabund),size = 7, shape = 17) +
+  geom_text(data = fort_sites, size = 7, aes(x = MDS1, y = MDS2, label = Label), nudge_x = 0.1, nudge_y = 0.1) +
+   labs(x = "MDS1",
+       y = "MDS2",
+       title = "PCoA - Algal Samples from Bd Experiment")
+fortify_plot
+
+
+
