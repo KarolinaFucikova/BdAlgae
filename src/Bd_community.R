@@ -10,12 +10,16 @@ Bd <- read.csv(file = "data/Bd.csv", row.names =1)
 # we will transpose 
 transp_bd <- t(Bd)
 
+# calculate Shannon index for each site
+H <- diversity(transp_bd)
+H
+
 # calculate the Jaccard index using
 # Jaccard is appropriate for presence/absence data
-jac <- 1-vegdist(transp_bd,method="jaccard")
+eucl <- vegdist(transp_bd,method="euclidean")
 
 # now we'll make a hierarchical cluster object, which will be the basis of the dendrogram
-bd_hc <-hclust(jac)
+bd_hc <-hclust(eucl)
 # and finally the dendrogram
 plot(bd_hc)
 
@@ -30,6 +34,6 @@ summary(PCoA.bd)
 
 plot(PCoA.bd, type = "n")
 points(PCoA.bd, display = "sites", cex = 0.8, pch=21, col="red", bg="yellow")
-text(PCoA.bd, display = "spec", cex=0.7, col="blue")
+text(PCoA.bd, display = "sites", cex=0.7, col="blue")
 
 # https://websites.pmc.ucsc.edu/~mclapham/Rtips/ordination.htm#:~:text=PCoA%20is%20a%20distance%2Dbased,for%20more%20information%20on%20distances).
